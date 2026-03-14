@@ -1,14 +1,4 @@
-export interface User {
-  id: string
-  firstName: string
-  lastName: string
-  email: string
-  catchPhrase: string
-  comments: string
-}
-
-// Reviewers share the same shape in this mock API.
-export interface Reviewer {
+export interface Person {
   id: string
   firstName: string
   lastName: string
@@ -27,4 +17,3 @@ export interface JsonServerPageResponse<T> {
   items: number
   data: T[]
 }
-

@@ -1,8 +1,7 @@
 import { Box, Tab, Tabs, useMediaQuery, useTheme } from '@mui/material'
 import type { SyntheticEvent } from 'react'
 import { useState } from 'react'
-import { UsersList } from '../../features/users/UsersList'
-import { ReviewersList } from '../../features/reviewers/ReviewersList'
+import { PersonList } from '../../features/persons/PersonList'
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -10,38 +9,18 @@ interface TabPanelProps {
   value: number
 }
 
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props
+function TabPanel({ children, value, index }: TabPanelProps) {
   const isActive = value === index
-
   return (
     <div
       role="tabpanel"
       hidden={!isActive}
       id={`users-reviewers-tabpanel-${index}`}
       aria-labelledby={`users-reviewers-tab-${index}`}
-      style={{
-        ...(isActive
-          ? {
-              flex: 1,
-              minHeight: 0,
-              display: 'flex',
-              flexDirection: 'column',
-            }
-          : undefined),
-      }}
-      {...other}
+      style={isActive ? { flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' } : undefined}
     >
       {isActive && (
-        <Box
-          sx={{
-            pt: 2,
-            flex: 1,
-            minHeight: 0,
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
+        <Box sx={{ pt: 2, flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
           {children}
         </Box>
       )}
@@ -67,34 +46,19 @@ export function UsersReviewersPanel() {
 
   if (isDesktop) {
     return (
-      <Box
-        sx={{
-          flex: 1,
-          minHeight: 0,
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: 4,
-        }}
-      >
+      <Box sx={{ flex: 1, minHeight: 0, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
         <Box sx={{ minWidth: 0, minHeight: 0 }}>
-          <UsersList />
+          <PersonList title="Users" endpoint="/users" />
         </Box>
         <Box sx={{ minWidth: 0, minHeight: 0 }}>
-          <ReviewersList />
+          <PersonList title="Reviewers" endpoint="/reviewers" />
         </Box>
       </Box>
     )
   }
 
   return (
-    <Box
-      sx={{
-        flex: 1,
-        minHeight: 0,
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
+    <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
       <Tabs
         value={tab}
         onChange={handleChange}
@@ -106,22 +70,14 @@ export function UsersReviewersPanel() {
         <Tab label="Users" {...a11yProps(0)} />
         <Tab label="Reviewers" {...a11yProps(1)} />
       </Tabs>
-      <Box
-        sx={{
-          flex: 1,
-          minHeight: 0,
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
+      <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
         <TabPanel value={tab} index={0}>
-          <UsersList />
+          <PersonList title="Users" endpoint="/users" />
         </TabPanel>
         <TabPanel value={tab} index={1}>
-          <ReviewersList />
+          <PersonList title="Reviewers" endpoint="/reviewers" />
         </TabPanel>
       </Box>
     </Box>
   )
 }
-

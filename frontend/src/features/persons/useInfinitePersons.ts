@@ -1,21 +1,22 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { fetchJson } from '../../api/client'
 import { buildSearchWhereClause } from '../../api/searchWhere'
-import type { User, JsonServerPageResponse } from '../../api/types'
+import type { Person, JsonServerPageResponse } from '../../api/types'
 
 const PAGE_SIZE = 40
 
-type UsersPageResponse = JsonServerPageResponse<User>
+type PersonsPageResponse = JsonServerPageResponse<Person>
 
-interface UseInfiniteUsersOptions {
+interface UseInfinitePersonsOptions {
+  endpoint: '/users' | '/reviewers'
   searchTerm: string
 }
 
-export function useInfiniteUsers({ searchTerm }: UseInfiniteUsersOptions) {
+export function useInfinitePersons({ endpoint, searchTerm }: UseInfinitePersonsOptions) {
   const term = searchTerm.trim()
 
-  return useInfiniteQuery<UsersPageResponse, Error>({
-    queryKey: ['users', term],
+  return useInfiniteQuery<PersonsPageResponse, Error>({
+    queryKey: [endpoint, term],
     initialPageParam: 1,
     queryFn: async ({ pageParam }) => {
       const params: Record<string, string | number | object> = {
@@ -25,9 +26,8 @@ export function useInfiniteUsers({ searchTerm }: UseInfiniteUsersOptions) {
       if (term) {
         params._where = buildSearchWhereClause(term)
       }
-      return fetchJson<UsersPageResponse>('/users', params)
+      return fetchJson<PersonsPageResponse>(endpoint, params)
     },
     getNextPageParam: (lastPage) => lastPage.next ?? undefined,
   })
 }
-
