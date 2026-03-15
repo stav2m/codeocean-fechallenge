@@ -1,73 +1,93 @@
-# React + TypeScript + Vite
+# Code Ocean Frontend Challenge
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React application featuring two side-by-side virtualized infinite-scroll lists — **Users** and **Reviewers** — each with independent search, loaded from a local mock API.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Getting Started
 
-## React Compiler
+### 1. Start the API server
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+From the repo root:
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm start
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+This starts [json-server](https://github.com/typicode/json-server) on `http://localhost:3001`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### 2. Start the frontend
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The app will be available at `http://localhost:5173`.
+
+---
+
+## Tech Stack
+
+| Concern | Library | Reason |
+|---|---|---|
+| Build | [Vite](https://vite.dev) | Fast dev server and HMR out of the box |
+| UI | [MUI v7](https://mui.com) | Comprehensive component library with a consistent design system |
+| Data fetching | [TanStack Query v5](https://tanstack.com/query) | Built-in `useInfiniteQuery`, caching, and loading/error states |
+| Virtualization | [react-window v2](https://github.com/bvaughn/react-window) | Renders only visible rows — scales to any number of items |
+| Layout sizing | [react-virtualized-auto-sizer](https://github.com/bvaughn/react-virtualized-auto-sizer) | Feeds the container's pixel dimensions into react-window |
+
+---
+
+## Key Implementation Decisions
+
+### Virtualized infinite scroll
+
+`VirtualizedInfiniteList` uses `react-window`'s `List` with a fixed row height. As the user scrolls, `onRowsRendered` fires and triggers `fetchNextPage` when within 5 rows of the current tail — giving a smooth, ahead-of-time loading experience without any scroll event listeners.
+
+A sentinel row (spinner) is appended to `rowCount` while the next page is in-flight, so the user sees immediate feedback before the data arrives.
+
+### Search
+
+Search is debounced by 400 ms (`useDebouncedValue`) before being sent to the API. The query key includes the debounced term, so TanStack Query automatically refetches and caches results per unique search. Changing the search term resets pagination to page 1.
+
+The `_where` clause sent to json-server supports:
+- Partial match on `firstName`, `lastName`, or `email`
+- Full-name queries (`"Jane Doe"`) matched as `firstName contains "Jane" AND lastName contains "Doe"` (and the reverse)
+
+### Responsive layout
+
+On **desktop (≥ md)** the two lists are rendered side by side in a CSS grid. On **mobile** they collapse into a `Tabs` component so neither list is cramped.
+
+### Tooltip-on-overflow
+
+`TruncatedTooltip` wraps MUI's `Tooltip` and uses a `ResizeObserver` to show the tooltip only when the text is actually truncated — avoiding redundant tooltips on wide screens.
+
+---
+
+## Project Structure
+
+```
+src/
+├── api/
+│   ├── client.ts          # fetch wrapper + URL builder
+│   ├── searchWhere.ts     # json-server _where clause builder
+│   └── types.ts           # Person and paginated response types
+├── components/
+│   ├── lists/
+│   │   └── VirtualizedInfiniteList.tsx   # generic virtualized list
+│   ├── Layout/
+│   │   └── UsersReviewersPanel.tsx       # side-by-side / tabbed layout
+│   └── TruncatedTooltip.tsx              # tooltip shown only on overflow
+├── features/
+│   └── persons/
+│       ├── PersonCard.tsx               # individual person row card
+│       ├── PersonList.tsx               # search input + list wired together
+│       └── useInfinitePersons.ts        # TanStack Query infinite fetching hook
+├── hooks/
+│   └── useDebouncedValue.ts
+├── App.tsx
+└── main.tsx
 ```
