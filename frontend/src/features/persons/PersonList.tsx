@@ -19,9 +19,12 @@ export function PersonList({ title, endpoint }: PersonListProps) {
   const { data, isLoading, isError, error, hasNextPage, isFetchingNextPage, fetchNextPage } =
     useInfinitePersons({ endpoint, searchTerm: debouncedSearch })
 
+  const isSearching = search !== debouncedSearch || isLoading
+
   const items = useMemo(
-    () => data?.pages.flatMap((page) => page.data) ?? [],
-    [data],
+    () => (isSearching ? [] : (data?.pages.flatMap((page) => page.data) ?? [])),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [data, isSearching],
   )
 
   return (
@@ -54,7 +57,7 @@ export function PersonList({ title, endpoint }: PersonListProps) {
         <Box sx={{ position: 'absolute', inset: 0 }}>
           <VirtualizedInfiniteList
             items={items}
-            isLoading={isLoading}
+            isLoading={isSearching}
             isError={isError}
             error={error}
             hasNextPage={hasNextPage}
