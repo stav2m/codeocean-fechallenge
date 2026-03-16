@@ -18,8 +18,8 @@ function buildUrl(path: string, params?: QueryParams): string {
   return url.toString()
 }
 
-export async function fetchJson<T>(path: string, params?: QueryParams): Promise<T> {
-  const response = await fetch(buildUrl(path, params))
+export async function fetchJson<T>(path: string, params?: QueryParams, signal?: AbortSignal): Promise<T> {
+  const response = await fetch(buildUrl(path, params), { signal })
 
   if (!response.ok) {
     const text = await response.text().catch(() => '')

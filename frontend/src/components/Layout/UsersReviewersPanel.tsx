@@ -2,6 +2,7 @@ import { Box, Tab, Tabs, useMediaQuery, useTheme } from '@mui/material'
 import type { SyntheticEvent } from 'react'
 import { useState } from 'react'
 import { PersonList } from '../../features/persons/PersonList'
+import { ErrorBoundary } from '../ErrorBoundary'
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -48,10 +49,14 @@ export function UsersReviewersPanel() {
     return (
       <Box sx={{ flex: 1, minHeight: 0, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
         <Box sx={{ minWidth: 0, minHeight: 0 }}>
-          <PersonList title="Users" endpoint="/users" />
+          <ErrorBoundary fallbackTitle="Users list unavailable">
+            <PersonList title="Users" endpoint="/users" />
+          </ErrorBoundary>
         </Box>
         <Box sx={{ minWidth: 0, minHeight: 0 }}>
-          <PersonList title="Reviewers" endpoint="/reviewers" />
+          <ErrorBoundary fallbackTitle="Reviewers list unavailable">
+            <PersonList title="Reviewers" endpoint="/reviewers" />
+          </ErrorBoundary>
         </Box>
       </Box>
     )
@@ -72,10 +77,14 @@ export function UsersReviewersPanel() {
       </Tabs>
       <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
         <TabPanel value={tab} index={0}>
-          <PersonList title="Users" endpoint="/users" />
+          <ErrorBoundary fallbackTitle="Users list unavailable">
+            <PersonList title="Users" endpoint="/users" />
+          </ErrorBoundary>
         </TabPanel>
         <TabPanel value={tab} index={1}>
-          <PersonList title="Reviewers" endpoint="/reviewers" />
+          <ErrorBoundary fallbackTitle="Reviewers list unavailable">
+            <PersonList title="Reviewers" endpoint="/reviewers" />
+          </ErrorBoundary>
         </TabPanel>
       </Box>
     </Box>

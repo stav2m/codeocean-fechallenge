@@ -18,7 +18,7 @@ export function useInfinitePersons({ endpoint, searchTerm }: UseInfinitePersonsO
   return useInfiniteQuery<PersonsPageResponse, Error>({
     queryKey: [endpoint, term],
     initialPageParam: 1,
-    queryFn: async ({ pageParam }) => {
+    queryFn: async ({ pageParam, signal }) => {
       const params: Record<string, string | number | object> = {
         _page: pageParam as number,
         _per_page: PAGE_SIZE,
@@ -26,7 +26,7 @@ export function useInfinitePersons({ endpoint, searchTerm }: UseInfinitePersonsO
       if (term) {
         params._where = buildSearchWhereClause(term)
       }
-      return fetchJson<PersonsPageResponse>(endpoint, params)
+      return fetchJson<PersonsPageResponse>(endpoint, params, signal)
     },
     getNextPageParam: (lastPage) => lastPage.next ?? undefined,
   })
